@@ -1,0 +1,40 @@
+{
+    "name": "mugen/eloquent-validation",
+    "description": "Laravel 5 Eloquent validation",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "aki",
+            "email": "mj501738931@126.com"
+        }
+    ],
+    "require": {
+        "php": "^7.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~6.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Mugen\\EloquentValidation\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Mugen\\EloquentValidation\\Tests": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Mugen\\EloquentValidation\\EloquentServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "optimize-autoloader": true
+    }
+}
