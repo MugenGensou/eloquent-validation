@@ -2,10 +2,10 @@
 
 namespace Mugen\EloquentValidation;
 
+use Illuminate\Validation\Factory as ValidatorFactory;
 use Illuminate\Validation\Validator;
 use Mugen\EloquentValidation\Contracts\ValidatorInterface;
 use Mugen\EloquentValidation\Exceptions\EloquentValidationException;
-use Validator as ValidatorFacade;
 
 /**
  * Class EloquentValidator
@@ -45,7 +45,7 @@ class EloquentValidator implements ValidatorInterface
      */
     protected function makeValidator(): Validator
     {
-        return ValidatorFacade::make($this->attributes, $this->rules);
+        return app(ValidatorFactory::class)->make($this->attributes, $this->rules);
     }
 
     /**
