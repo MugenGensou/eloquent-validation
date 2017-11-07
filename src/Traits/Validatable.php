@@ -15,7 +15,7 @@ trait Validatable
      * Trans model casts to rules
      * @var array
      */
-    protected $castRules = [
+    protected $castMapping = [
         'int'        => 'integer',
         'integer'    => 'integer',
         'real'       => 'numeric',
@@ -40,13 +40,18 @@ trait Validatable
      * Type validate rules
      * @var array
      */
-    protected $typeRules = [];
+    // protected $typeRules;
 
     /**
      * Logic validate rules
      * @var array
      */
-    protected $logicRules = [];
+    // protected $logicRules;
+
+    /**
+     * @var array
+     */
+    // protected $nullable;
 
     /**
      * @var array
@@ -64,33 +69,90 @@ trait Validatable
 
     protected function rules(string $event = null): array
     {
-        if (empty($this->rules)) {
-            $casts = $this->getCasts();
-
-            if ($event === 'creating')
-                unset($casts[$this->getKeyName()]);
-
-            foreach ($casts as &$cast)
-                if (isset($this->castRules[$cast]))
-                    $cast = (array)$this->castRules[$cast];
-
-            $this->mergeRules($casts);
-
-            $this->mergeRules($this->typeRules);
-
-            $this->mergeRules($this->logicRules);
-        }
-
-        return $this->rules;
+        return $this->rules[$event] ?? $this->rules[$event] = $this->mergeRules(
+                $this->castRules($event === 'creating'),
+                $this->nullable(),
+                $this->typeRules($event),
+                $this->logicRules($event)
+            );
     }
 
-    protected function mergeRules(array $mergeRules = []): void
+    /**
+     * @param bool $withoutPrimary
+     * @return array
+     */
+    protected function castRules(bool $withoutPrimary): array
     {
-        foreach ($mergeRules as $key => $rules) {
-            if (is_string($rules))
-                $rules = explode('|', $rules);
+        $casts = $this->getCasts();
 
-            $this->rules[$key] = array_merge($this->rules[$key] ?? [], $rules);
-        }
+        if ($withoutPrimary)
+            unset($casts[$this->getKeyName()]);
+
+        foreach ($casts as &$cast)
+            if (isset($this->castMapping[$cast]))
+                $cast = (array)$this->castMapping[$cast];
+
+        return $casts;
+    }
+
+    /**
+     * @return array
+     */
+    protected function nullable(): array
+    {
+        if (!property_exists($this, 'nullable'))
+            return [];
+
+        return array_combine(
+            $this->nullable,
+            array_fill(0, count($this->nullable), 'nullable')
+        );
+    }
+
+    /**
+     * @param string $event
+     * @return array
+     */
+    protected function typeRules(string $event): array
+    {
+        if (property_exists($this, 'typeRules') && is_array($this->typeRules))
+            return $this->typeRules;
+
+        return [];
+    }
+
+    /**
+     * @param string $event
+     * @return array
+     */
+    protected function logicRules(string $event): array
+    {
+        if (property_exists($this, 'logicRules') && is_array($this->logicRules))
+            return $this->logicRules;
+
+        return [];
+    }
+
+    /**
+     * @param array ...$mergeRules
+     * @return array
+     */
+    protected function mergeRules(...$mergeRules): array
+    {
+        $finalRules = [];
+
+        foreach ($mergeRules as $mergeRule)
+            if (is_array($mergeRule) && count($mergeRule))
+                foreach ($mergeRule as $key => $rules) {
+                    if (empty($rules))
+                        continue;
+
+                    if (is_string($rules))
+                        $rules = explode('|', $rules);
+
+                    $finalRules[$key] = array_merge($finalRules[$key] ?? [], $rules);
+                }
+
+        return $finalRules;
     }
 }
