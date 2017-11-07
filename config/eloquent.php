@@ -3,11 +3,17 @@
 return [
 
     /**
-     * work events
+     * Listen events
      * booting , booted , retrieved , saving , saved , updating , updated , creating , created , deleting , deleted
      */
-    'listenEvent' => [
+    'events' => [
         'updating',
         'creating',
-    ]
+    ],
+
+    /**
+     * Skip validate models
+     */
+    'skip'   => [
+    ],
 ];

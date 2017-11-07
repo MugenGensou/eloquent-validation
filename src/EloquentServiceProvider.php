@@ -35,12 +35,14 @@ class EloquentServiceProvider extends ServiceProvider
         Event::listen('eloquent.*', function (string $eventName, array $data) {
             $action = $this->getAction($eventName);
 
-            if (in_array($action, $this->app['config']->get('eloquent.listenEvent'))) {
-                $eloquent = $data[0];
+            $eloquent = $data[0];
 
-                if ($eloquent instanceof ShouldValidate)
-                    return $eloquent->validator($action)->validate();
-            }
+            if (
+                in_array($action, $this->app['config']->get('eloquent.events'))
+                && $eloquent instanceof ShouldValidate
+                && !in_array(get_class($eloquent), $this->app['config']->get('eloquent.skip'))
+            )
+                return $eloquent->validator($action)->validate();
 
             return true;
         });
