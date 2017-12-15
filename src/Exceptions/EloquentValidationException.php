@@ -3,12 +3,14 @@
 namespace Mugen\EloquentValidation\Exceptions;
 
 use Exception;
+use Illuminate\Contracts\Support\Responsable;
+use Response;
 
 /**
  * Class EloquentValidationException
  * @package Mugen\EloquentValidation\Exceptions
  */
-class EloquentValidationException extends Exception
+class EloquentValidationException extends Exception implements Responsable
 {
     /**
      * @var array
@@ -23,7 +25,7 @@ class EloquentValidationException extends Exception
     {
         $this->errors = $errors;
 
-        parent::__construct(trans('The data type written to the database is incorrect.'));
+        parent::__construct(__('The data type written to the database is incorrect.'));
     }
 
     /**
@@ -32,5 +34,13 @@ class EloquentValidationException extends Exception
     public function getErrors(): array
     {
         return $this->errors;
+    }
+
+    public function toResponse($request)
+    {
+        return Response::json([
+            'message' => $this->getMessage(),
+            'errors'  => $this->getErrors(),
+        ], 500);
     }
 }
